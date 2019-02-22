@@ -1,4 +1,4 @@
-const db = require('./db')
+const db = require('./db.js')
 const express = require('express')
 const server = express();
 const helmet = require("helmet");
@@ -14,8 +14,8 @@ server.get('/', (req, res) => {
 server.post('/api/projects', (req, res) => {
     const newProject = req.body
     db.addProject(newProject)
-    .then(project => {
-        res.status(201).json(project)
+    .then(proj=> {
+        res.status(201).json(proj)
     })
     .catch(err => {
         res.status(500)
@@ -27,8 +27,8 @@ server.post('/api/projects', (req, res) => {
 server.post('/api/actions', (req, res) => {
     const newAction = req.body
     db.addProject(newAction)
-    .then(action => {
-        res.status(201).json(action)
+    .then(act => {
+        res.status(201).json(act)
     })
     .catch(err => {
         res.status(500)
@@ -39,9 +39,52 @@ server.post('/api/actions', (req, res) => {
 });
 
 //get project by id
-server.get('/', (req, res) => {
+server.get('/api/projects/:id', (req, res) => {
+    const { id } = req.params
+    db.getProjectById(id)
+    .then(project => {
+        if(project.length > 0) {
+            res.json(project)
+        } else{
+            res.status(404)
+            .json({ message: 'There is no project with the ID provided'})
+        }
+    })
+    .catch(err => {
+        res.status(500)
+        .json({message: 'Could not retrieve project'})
+    })
+});
+
+//get projects
+
+server.get('/api/projects', (req, res) => {
+    db.getProjects()
+    .then(projects => {
+        res.status(200).json(projects);
+    })
+    .catch(() => {
+        res.status(500).json({ error: 'No project information could be retrieved. '});
+    });
     
 });
+
+
+//get actions
+
+server.get('/api/actions', (req, res) => {
+    db.getActions()
+    .then(actions => {
+        res.status(200).json(actions);
+    })
+    .catch(() => {
+        res.status(500).json({ error: 'No action information could be retrieved. '});
+    });
+    
+});
+
+//get actions by id
+
 
 
 const port = 4000;
